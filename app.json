@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "marcopolo",
+    "description": "A very interesting project.",
+    "slug": "marcopolo",
+    "privacy": "unlisted",
+    "sdkVersion": "28.0.0",
+    "platforms": ["ios", "android"],
+    "version": "1.1.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.polomarco.swarn",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["comgooglemaps", "uber", "lyft", "waze"]
+      }
+    },
+    "android": {
+      "package": "com.polomarco.swarn",
+      "versionCode": 3,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAFNnrDvx0rSbZRp_WbciIkbrZiZpIHa34"
+        }
+      }
+    }
+  }
+}
