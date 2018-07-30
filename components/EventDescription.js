@@ -95,7 +95,7 @@ const EventDescription = props => (
         <Button rounded
         style={{ backgroundColor: '#2F80ED', borderRadius: 100, padding: 10}}
         textStyle={{ color: '#fff' }}
-        onPress={() => addRandomPost(name)}
+        onPress={() => Linking.openURL(props.event.info)}
         >
         <Feather name="info" {...buttonProps} />
         </Button>

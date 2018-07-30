@@ -6,6 +6,9 @@ import * as firebase from 'firebase';
 import Login from '../screens/LoginScreen';
 import Loading from '../screens/Loading';
 import SignUp from '../screens/SignUp';
+import OrginalStory from '../screens/OrginalStory';
+import Organizations from '../screens/Organizations';
+
 import MainTabNavigator from './MainTabNavigator';
 import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
 
@@ -28,6 +31,14 @@ const RootStackNavigator = createStackNavigator(
       screen: MainTabNavigator,
       navigationOptions:  {headerLeft: null}
     },
+    OrginalStory:{
+      screen: OrginalStory,
+      navigationOptions:  {headerMode: 'float', headerLeft: true}
+    },
+    Organizations:{
+      screen: Organizations,
+      navigationOptions:  {headerMode: 'float', headerLeft: true}
+    }
   },
   {
   headerMode: 'none',
