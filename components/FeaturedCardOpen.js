@@ -25,7 +25,7 @@ const buttonProps = {
 };
 
 const FeaturedCardOpen = props => {
-  let { image, type, name, tagline, date, interested, ...rest } = props;
+  let { image, type, name, time, date, interested, ...rest } = props;
 
   return (
     <Card {...rest} backgroundImage={image}>
@@ -34,7 +34,10 @@ const FeaturedCardOpen = props => {
       <Text style={styles.cardTypeText}>{interested + ' Interested '}</Text>
       </View>
       <Text style={styles.cardNameText}>{name}</Text>
-      
+      <View style={styles.cardContent}>
+      <View style={{flexDirection:'row'}}>
+        </View>
+      </View>
     </Card>
   );
 };
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingLeft: 25,
     fontWeight: '700',
-    backgroundColor: 'white',
+    color: 'white',
     height: 60,
     flexDirection: 'row',
 

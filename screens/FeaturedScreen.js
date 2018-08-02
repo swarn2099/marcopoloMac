@@ -14,7 +14,7 @@ import {
   RefreshControl,
   ImageBackground
 } from 'react-native';
-import { WebBrowser, Permissions, Location, Haptic } from 'expo';
+import { WebBrowser, Permissions, Location, Haptic, Notification } from 'expo';
 import * as firebase from 'firebase';
 require("firebase/firestore");
 import moment from 'moment';
@@ -33,30 +33,7 @@ const animConfig = {
     springDamping: 0.8,
   },
 };
-const Simple = () => (
-  <Onboarding
-    pages={[
-      {
-        backgroundColor: '#fff',
-        image: <Image source={require('../assets/images/icon.png')} />,
-        title: 'Onboarding',
-        subtitle: 'Done with React Native Onboarding Swiper',
-      },
-      {
-        backgroundColor: '#fe6e58',
-        image: <Image source={require('../assets/images/icon.png')} />,
-        title: 'The Title',
-        subtitle: 'This is the subtitle that sumplements the title.',
-      },
-      {
-        backgroundColor: '#999',
-        image: <Image source={require('../assets/images/icon.png')} />,
-        title: 'Triangle',
-        subtitle: "Beautiful, isn't it?",
-      },
-    ]}
-  />
-);
+
 export default class Featured extends React.Component {
   static navigationOptions = {
     header: null,
@@ -64,7 +41,6 @@ export default class Featured extends React.Component {
 
   constructor(props) {
     super(props);
-    this.ref = firebase.firestore().collection('approvedEvents');
 
     this.state = {
       loading: true,
@@ -76,6 +52,7 @@ export default class Featured extends React.Component {
       open: false,
       isAnimating: false,
       dimensions: {},
+      pullToRefresh: "Pull down to refresh"
     };
 
     this._eventRefs = [];
@@ -91,6 +68,8 @@ export default class Featured extends React.Component {
 
   async componentWillReceiveProps(nextProps) {
     let { location, locationLoaded } = nextProps.screenProps;
+    let result = await
+    Permissions.askAsync(Permissions.NOTIFICATIONS);
 
     if (locationLoaded) {
       await this.fetchFeaturedEvents(location);
@@ -107,7 +86,7 @@ export default class Featured extends React.Component {
     }
   }
 
-  async fetchFeaturedEvents(location = null) {
+  async fetchFeaturedEvents(location) {
     this.setState(() => ({
       refreshing: true,
     }));
@@ -166,11 +145,12 @@ export default class Featured extends React.Component {
             image: event.imageURL && event.imageURL.length > 0 && {
               uri: event.imageURL
             },
-            tagline: event.startTime + ' | ' + event.endTime,
+            time: event.startTime + ' to ' + event.endTime,
             interested: event.population,
             date: event.date,
             sponsored: event.sponsored,
             city: event.city,
+            location: event.location,
           }
         })
         .filter(e => e.featured === true && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day') && (allCities || !e.city || allowedCities.includes(e.city)));
@@ -290,6 +270,7 @@ export default class Featured extends React.Component {
       dimensions,
       refreshing,
       loading,
+      pullToRefresh
     } = this.state;
 
     return (
@@ -308,6 +289,7 @@ export default class Featured extends React.Component {
             location={this.props.screenProps.location}
           />
           <View style={styles.cardList}>
+
             {events.length > 0 ? events.map((e, i) => (
                   <Animated.View
                     key={e.id}
@@ -319,9 +301,9 @@ export default class Featured extends React.Component {
                     type={e.category}
                     image={e.imageURL}
                     date={e.date}
-                    tagline={e.startTime + ' | ' + e.endTime}
+                    time={e.startTime + ' to ' + e.endTime}
                     interested={e.interested}
-                    sponsored={e.sponsored}
+                    location={e.location}
                     cardStyle={{ height: 400 }}
                     onPressIn={() => this.onCardPressIn(i)}
                     onPressOut={() => this.onCardPressOut(i)}
@@ -336,7 +318,7 @@ export default class Featured extends React.Component {
                   <FeaturedCard
                     name="No Featured Events"
                     type="Uh oh"
-                    tagline="Check back soon!"
+                    time="Check back soon!"
                     image={require('../assets/images/nothing-found.gif')}
                     cardStyle={{ height: 350 }}
                     shadow

@@ -26,7 +26,7 @@ const buttonProps = {
 };
 
 const FeaturedCard = props => {
-  let { image, type, name, tagline, date, interested, ...rest } = props;
+  let { image, type, name, time, date, interested, ...rest } = props;
 
   return (
     <Card {...rest} backgroundImage={image}>
@@ -38,7 +38,7 @@ const FeaturedCard = props => {
       <Text style={styles.cardNameText}>{name}</Text>
       <View style={styles.cardContent}>
       <View style={{flexDirection:'row'}}>
-        <Text style={styles.cardDescriptionText}>{tagline}</Text>
+        <Text style={styles.cardDescriptionText}>{time}</Text>
         <View style={{backgroundColor:'white', width: 200, paddingLeft: 70, paddingTop: 6}}>
         <Button rounded style={{padding: 25}} onPress={() => addRandomPost(name)}><Feather name="thumbs-up" {...buttonProps} /></Button>
         </View>

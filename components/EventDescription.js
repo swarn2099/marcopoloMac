@@ -17,6 +17,7 @@ import { ifIphoneX } from 'react-native-iphone-x-helper';
 import FeaturedCardOpen from './FeaturedCardOpen';
 import {Button} from 'native-base';
 import {addRandomPost} from './helper';
+import { Notifications, Haptic, Constants, Permissions,} from 'expo';
 
 import {
   Entypo,
@@ -32,11 +33,19 @@ const buttonProps = {
   padding: 5
 
 };
-const eventConfig = {
-  title: "Hello"
-  // and other options
-};
+const localNotification = {};
+const title = {};
+const body = {};
+const schedulingOptions = {};
+const time = {};
+
 const EventDescription = props => (
+  title = props.event.name,
+  body = props.event.type,
+  time = props.event.startTime,
+
+localNotification = {title, body},
+schedulingOptions = {time},
   <View style={[styles.container,!props.isAnimating && props.open && { backgroundColor: '#fff' },]}>
     <ScrollView contentContainerStyle={props.isAnimating && styles.content} scrollEnabled={!props.isAnimating}>
       <FeaturedCardOpen
@@ -64,6 +73,7 @@ const EventDescription = props => (
           { height: props.height || props.dimensions.height },
         ]}
       />
+
       <View
         style={[
           styles.description,
@@ -102,24 +112,14 @@ const EventDescription = props => (
         <Button rounded
         style={{ backgroundColor: '#e23d50', borderRadius: 50, padding: 10 }}
         textStyle={{ color: '#fff' }}
-          onPress={() =>AddCalendarEvent.presentEventCreatingDialog(eventConfig)
-  .then((eventInfo: { calendarItemIdentifier: string, eventIdentifier: string }) => {
-    // handle success - receives an object with `calendarItemIdentifier` and `eventIdentifier` keys, both of type string.
-    // These are two different identifiers on iOS.
-    // On Android, where they are both equal and represent the event id, also strings.
-    // when { action: 'CANCELLED' } is returned, the dialog was dismissed
-    console.warn(JSON.stringify(eventInfo));
-  })
-  .catch((error: string) => {
-    // handle error such as when user rejected permissions
-    console.warn(error);
-  })
-          }
+        onPress={() => Notifications.scheduleLocalNotificationAsync(
+            localNotification, schedulingOptions
+        )}
         >
-          <FontAwesome name="calendar" {...buttonProps} />
+          <FontAwesome name="bell" {...buttonProps} />
         </Button>
         <Button rounded
-        style={{ backgroundColor: 'blue', borderRadius: 50, padding: 10 }}
+        style={{ borderRadius: 50, padding: 10 }}
         textStyle={{ color: '#fff' }}
           onPress={() => addRandomPost(props.event.name)}
         >
@@ -142,10 +142,17 @@ const EventDescription = props => (
           </Button>
 
       </View>
-      // <Text style={{fontSize: 30, fontWeight: '800'}}>About the Event</Text>
+      <View style={{flex: 1, flexDirection: 'column'}}>
+      <Text style={{fontSize: 30, fontWeight: '800', paddingBottom: 15}}>About the Event</Text>{"\n"}
+      <Text style={styles.logistics}>{props.event.time}</Text>
+      <Text style={styles.logistics}>{props.event.date}</Text>
+      <Text style={styles.logistics}>{props.event.location}</Text>
+
+
         <Markdown style={markdownStyles}>
           {`\n\n\n${props.event.description}`}
         </Markdown>
+        </View>
 
 
       </View>
@@ -190,6 +197,12 @@ const styles = StyleSheet.create({
   header: {
     flex: 0,
     borderRadius: 0,
+  },
+  logistics:{
+    fontSize: 15,
+    fontWeight: '700',
+    fontStyle: 'italic',
+    justifyContent: 'flex-end'
   },
   description: {
     flex: 1,

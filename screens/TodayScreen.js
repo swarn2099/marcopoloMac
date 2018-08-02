@@ -159,7 +159,7 @@ this.state.index === 5;
             image: event.imageURL && event.imageURL.length > 0 && {
               uri: event.imageURL
             },
-            tagline: event.startTime + ' | ' + event.endTime,
+            time: event.startTime + ' to ' + event.endTime,
             interested: event.population,
             date: event.date,
             sponsored: event.sponsored,
@@ -295,7 +295,7 @@ this.state.index === 5;
                    },
                    interested: event.population,
 
-                   tagline: event.startTime + ' | ' + event.endTime,
+                   time: event.startTime + ' to ' + event.endTime,
                    date: event.date,
                    sponsored: event.sponsored,
                    city: event.city,
@@ -329,7 +329,7 @@ this.state.index === 5;
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -362,13 +362,13 @@ this.state.index === 5;
                },
                interested: event.population,
 
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
              }
            })
-           .filter(e => e.category === 'Music' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
+           .filter(e => e.category === 'Entertainment' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
            this.setState(() => ({
              refreshing: false,
              events,
@@ -376,6 +376,71 @@ this.state.index === 5;
        });
      }
      if(index === 3){
+       firebase.firestore().collection('approvedEvents').get().then((snap) => {
+         itemsEnt = snap.docs.reduce((resEnt, itemEnt) => ({ ...resEnt,
+           [itemEnt.id]: itemEnt.data()
+         }), {});
+         this.setState({itemsEnt})
+         events = Object.keys(itemsEnt || {})
+           .map(id => {
+             let event = itemsEnt[id];
+             return {
+               ...event,
+               id,
+               name: event.name,
+               type: event.category,
+               interested: event.population,
+
+               image: event.imageURL && event.imageURL.length > 0 && {
+                 uri: event.imageURL
+               },
+               time: event.startTime + ' to ' + event.endTime,
+               date: event.date,
+               sponsored: event.sponsored,
+               city: event.city,
+             }
+           })
+           .filter(e => e.category === 'Entertainment' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
+           this.setState(() => ({
+             refreshing: false,
+             events,
+           }));
+       });
+     }
+     if(index === 4){
+       firebase.firestore().collection('approvedEvents').get().then((snap) => {
+         itemsSports= snap.docs.reduce((resSports, itemSports) => ({ ...resSports,
+           [itemSports.id]: itemSports.data()
+         }), {});
+         this.setState({itemsSports})
+         events = Object.keys(itemsSports || {})
+           .map(id => {
+             let event = itemsSports[id];
+             return {
+               ...event,
+               id,
+               name: event.name,
+               type: event.category,
+               interested: event.population,
+
+               image: event.imageURL && event.imageURL.length > 0 && {
+                 uri: event.imageURL
+               },
+               time: event.startTime + ' to ' + event.endTime,
+               date: event.date,
+               sponsored: event.sponsored,
+               city: event.city,
+             }
+           })
+           .filter(e => e.category === 'Sports' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
+           console.log(events);
+           this.setState(() => ({
+             refreshing: false,
+             events,
+           }));
+       });
+     }
+     if(index === 5){
        firebase.firestore().collection('approvedEvents').get().then((snap) => {
          itemsParties = snap.docs.reduce((resParties, itemParties) => ({ ...resParties,
            [itemParties.id]: itemParties.data()
@@ -388,13 +453,13 @@ this.state.index === 5;
                ...event,
                id,
                name: event.name,
-               type: event.category,
                interested: event.population,
 
+               type: event.category,
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -407,69 +472,74 @@ this.state.index === 5;
            }));
        });
      }
-     if(index === 4){
+     if(index === 6){
        firebase.firestore().collection('approvedEvents').get().then((snap) => {
-         itemsClub = snap.docs.reduce((resClub, itemClub) => ({ ...resClub,
-           [itemClub.id]: itemClub.data()
-         }), {});
-         this.setState({itemsClub})
-         events = Object.keys(itemsClub || {})
-           .map(id => {
-             let event = itemsClub[id];
-             return {
-               ...event,
-               id,
-               name: event.name,
-               type: event.category,
-               interested: event.population,
+             itemsOrg = snap.docs.reduce((resOrg, itemOrg) => ({ ...resOrg,
+               [itemOrg.id]: itemOrg.data()
+             }), {});
+             this.setState({
+               itemsFree
+             })
+             events = Object.keys(itemsFree)
+               .map(id => {
+                 let event = itemsFree[id];
+                 return {
+                   ...event,
+                   id,
+                   name: event.name,
+                   type: event.category,
+                   image: event.imageURL && event.imageURL.length > 0 && {
+                     uri: event.imageURL
+                   },
+                   interested: event.population,
 
-               image: event.imageURL && event.imageURL.length > 0 && {
-                 uri: event.imageURL
-               },
-               tagline: event.startTime + ' | ' + event.endTime,
-               date: event.date,
-               sponsored: event.sponsored,
-               city: event.city,
-             }
-           })
-           .filter(e => e.category === 'Club' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
-           console.log(events);
-           this.setState(() => ({
-             refreshing: false,
-             events,
-           }));
+                   time: event.startTime + ' to ' + event.endTime,
+                   date: event.date,
+                   sponsored: event.sponsored,
+                   city: event.city,
+                 }
+               })
+               .filter(e => e.category === 'Organizations' && moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day'));
+               this.setState(() => ({
+                 refreshing: false,
+                 events,
+                 index
+               }));
        });
      }
-     if(index === 5){
+     if(index === 7){
        firebase.firestore().collection('approvedEvents').get().then((snap) => {
-         itemsAll = snap.docs.reduce((resAll, itemAll) => ({ ...resAll,
-           [itemAll.id]: itemAll.data()
-         }), {});
-         this.setState({itemsAll})
-         events = Object.keys(itemsAll || {})
-           .map(id => {
-             let event = itemsAll[id];
-             return {
-               ...event,
-               id,
-               name: event.name,
-               interested: event.population,
+             itemsAll = snap.docs.reduce((resAll, itemAll) => ({ ...resAll,
+               [itemAll.id]: itemAll.data()
+             }), {});
+             this.setState({
+               itemsAll
+             })
+             events = Object.keys(itemsAll)
+               .map(id => {
+                 let event = itemsAll[id];
+                 return {
+                   ...event,
+                   id,
+                   name: event.name,
+                   type: event.category,
+                   image: event.imageURL && event.imageURL.length > 0 && {
+                     uri: event.imageURL
+                   },
+                   interested: event.population,
 
-               type: event.category,
-               image: event.imageURL && event.imageURL.length > 0 && {
-                 uri: event.imageURL
-               },
-               tagline: event.startTime + ' | ' + event.endTime,
-               date: event.date,
-               sponsored: event.sponsored,
-               city: event.city,
-             }
-           })
-           .filter(e =>moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day')  );
-           this.setState(() => ({
-             refreshing: false,
-             events,
-           }));
+                   time: event.startTime + ' to ' + event.endTime,
+                   date: event.date,
+                   sponsored: event.sponsored,
+                   city: event.city,
+                 }
+               })
+               .filter(e => moment().isSame(moment(e.date, 'MMMM D, YYYY'), 'day'));
+               this.setState(() => ({
+                 refreshing: false,
+                 events,
+                 index
+               }));
        });
      }
    }
@@ -504,12 +574,12 @@ this.state.index === 5;
           <ButtonGroup
             selectedButtonStyle={{borderRadius: 2}, {backgroundColor: "#48baa3"}}
             selectedTextStyle={{color: "#fff"}}
-            textStyle={{fontSize: 12}}
+            textStyle={{fontSize: 10}}
             onPress={this.updateIndex}
             selectedIndex={this.state.index}
-            buttons={['Free', 'Food', 'Music', 'Parties', 'Org', 'All']}
+            buttons={['Free', 'Food', 'Music', 'Ent.', 'Sports', 'Parties','Org','All']}
             containerStyle={{height: 100}, {backgroundColor: "#fff"}, {borderRadius: 15}}
-            containerBorderRadius={2} />
+            containerBorderRadius={20} />
           <View style={styles.cardList}>
             {events.length > 0
               ? events.map((e, i) => (
@@ -526,7 +596,7 @@ this.state.index === 5;
                     name={e.name}
                     type={e.category}
                     image={e.imageURL}
-                    tagline={e.startTime + ' | ' + e.endTime}
+                    time={e.startTime + ' | ' + e.endTime}
                     sponsored={e.sponsored}
                     interested={e.interested}
                     cardStyle={{ height: 300 }}
@@ -541,7 +611,7 @@ this.state.index === 5;
                   <FeaturedCard
                     name="No Featured Events"
                     type="Uh oh"
-                    tagline="Check back soon!"
+                    time="Check back soon!"
                     image={require('../assets/images/nothing-found.gif')}
                     cardStyle={{ height: 350 }}
                     shadow

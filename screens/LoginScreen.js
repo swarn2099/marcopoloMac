@@ -44,11 +44,7 @@ export default class Login extends React.Component {
       <SafeAreaView style={styles.container} forceInset={{ top: 'always' }}>
 
       <View style={styles.container}>
-      <Image
-        style={styles.brand}
-        resizeMode="contain"
-        source={require('../assets/images/brand.png')}
-      />
+      
     <Text style={styles.headerText}>Login</Text>
     {this.props.subtitle && (
       <Text style={styles.subHeaderText}>{this.props.subtitle}</Text>

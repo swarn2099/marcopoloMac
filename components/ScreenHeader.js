@@ -34,7 +34,7 @@ export default class ScreenHeader extends React.Component {
         <View style={styles.dataLogoContainer}>
           <Text style={styles.locationText}>{city ? dateLocation : strDate}</Text>
           </View>
-          <View style={{flex: 1,flexDirection: 'row',}}>
+          <View style={{flex: 1,flexDirection: 'row', paddingBottom: 10}}>
           <Text style={styles.headerText}>{this.props.title}</Text>
           {this.props.subtitle && (
             <Text style={styles.subHeaderText}>{this.props.subtitle}</Text>
@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
   },
   brand2: {
     width: 60,
-    height: 65,
-    bottom: 20,
+    height: 40,
+    bottom: 10,
     backgroundColor: '#fff',
     justifyContent: 'flex-end',
   },

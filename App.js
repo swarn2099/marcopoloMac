@@ -7,7 +7,7 @@ import {
   View,
   UIManager,
 } from 'react-native';
-import { AppLoading, Asset, Font, Permissions, Location } from 'expo';
+import { AppLoading, Asset, Font, Permissions, Location, Constants } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import RootNavigation from './navigation/RootNavigation';
 import Octicons from '@expo/vector-icons/Octicons';
@@ -36,6 +36,10 @@ export default class App extends React.Component {
 
   async componentDidMount() {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let result =  await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    if (Constants.isDevice && result.status === 'granted') {
+       console.log('Notification permissions granted.')
+      }
 
     if (status === 'granted') {
       let {
@@ -129,6 +133,7 @@ export default class App extends React.Component {
         require('./assets/images/brand.png'),
         // require('./assets/images/concert.jpg'),
       ]),
+
       Font.loadAsync({
         // This is the font that we are using for our tab bar
         ...Ionicons.font,

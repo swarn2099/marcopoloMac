@@ -17,39 +17,39 @@ const NotificationTypes = {
 
 export function addStoryLike(name){
 
-  Haptic.impact(Haptic.ImpactStyles.Light)
+
+    Haptic.notification(Haptic.NotificationTypes.Warning)
 
 
+   firebase.firestore()
+      .runTransaction(async transaction => {
+        const doc = await transaction.get(firebase.firestore().collection('stories').doc(name));
 
- firebase.firestore()
-    .runTransaction(async transaction => {
-      const doc = await transaction.get(firebase.firestore().collection('stories').doc(name));
+        // if it does not exist set the population to one
+        if (!doc.exists) {
+          transaction.set(firebase.firestore().collection('stories').doc(name), { population: 1 });
+          // return the new value so we know what the new population is
+          return 1;
+        }
 
-      // if it does not exist set the population to one
-      if (!doc.exists) {
-        transaction.set(firebase.firestore().collection('stories').doc(name), { population: 1 });
+        // exists already so lets increment it + 1
+        const newPopulation = doc.data().population + 1;
+
+        transaction.update(firebase.firestore().collection('stories').doc(name), {
+          population: newPopulation,
+        });
+
         // return the new value so we know what the new population is
-        return 1;
-      }
-
-      // exists already so lets increment it + 1
-      const newPopulation = doc.data().population + 1;
-
-      transaction.update(firebase.firestore().collection('stories').doc(name), {
-        population: newPopulation,
+        return newPopulation;
+      })
+      .then(newPopulation => {
+        console.log(
+          `Transaction successfully committed and new population is '${newPopulation}'.`
+        );
+      })
+      .catch(error => {
+        console.log('Transaction failed: ', error);
       });
-
-      // return the new value so we know what the new population is
-      return newPopulation;
-    })
-    .then(newPopulation => {
-      console.log(
-        `Transaction successfully committed and new population is '${newPopulation}'.`
-      );
-    })
-    .catch(error => {
-      console.log('Transaction failed: ', error);
-    });
 }
 export function addRandomPost(name){
 

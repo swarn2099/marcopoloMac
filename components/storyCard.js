@@ -35,7 +35,7 @@ const StoryCard = props => {
       <Text style={styles.cardNameText}>{name}</Text>
       <View style={styles.cardContent}>
       <View style={{flexDirection:'row'}}>
-      <Text style={styles.cardDescriptionText}>{interested + ' Interested '}</Text>
+      <Text style={styles.cardDescriptionText}>{interested + ' Likes '}</Text>
         <View style={{backgroundColor:'white', width: 400, paddingLeft: 90, paddingTop: 10}}>
         <Button style={{width: 50, left: 20, borderRadius: 20, padding: 3}} onPress={() => addStoryLike(name)}><Feather name="thumbs-up" {...buttonProps} /></Button>
         </View>

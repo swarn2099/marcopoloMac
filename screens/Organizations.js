@@ -4,164 +4,344 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
-  Text,
   Animated,
-  Linking,
   LayoutAnimation,
   StatusBar,
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 
-import { WebBrowser, Permissions, Location, Haptic } from 'expo';
+import { WebBrowser, Permissions, Location } from 'expo';
 import * as firebase from 'firebase';
 require("firebase/firestore");
-import MainTabNavigator from '../navigation/MainTabNavigator';
-import {StackNavigator} from 'react-navigation';
-import ScreenHeader from '../components/ScreenHeader';
+import {FormLabel, FormInput, ButtonGroup} from 'react-native-elements';
+
 import moment from 'moment';
 import geodist from 'geodist';
 import sleep from 'await-sleep';
-import PoolCards from '../components/PoolCards';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
-const ImpactStyles = {
-  'Light': 'light',
-  'Medium': 'medium',
-  'Heavy': 'heavy',
-}
-const NotificationTypes = {
-  'Success': 'success',
-  'Warning': 'warning',
-  'Error': 'error',
-}
 
+import ScreenHeader from '../components/ScreenHeader';
+import StoryCard from '../components/storyCard';
+import StoryDescription from '../components/StoryDescription';
+import Carousel from 'react-native-snap-carousel';
+
+const spring = LayoutAnimation.Presets.spring;
+const animConfig = {
+  ...spring,
+  update: {
+    ...spring.update,
+    springDamping: 0.725,
+  },
+};
 
 export default class Featured extends React.Component {
-    static navigationOptions = {
-      header: null,
-    };
-    constructor(props){
-      super();
-      this.state = {
-        data: [],
-        event: -1,
-        events: [],
-      }
-      this._carousel = {};
-    }
-    async componentWillMount(){
+  static navigationOptions = {
+    header: null,
+  };
 
-      firebase.firestore().collection('stories').get().then((snap) => {
-        items = snap.docs.reduce((res, item) => ({ ...res, [item.id]: item.data()}), {});
-        events = Object.keys(items || {})
-          .map(id => {
-            let event = items[id];
-            return {
-              ...event,
-              id,
-              name: event.name,
-              interested: event.population,
-              featured: event.featured,
-              type: event.category,
-              image: event.imageURL && event.imageURL.length > 0 && {
-                uri: event.imageURL
-              },
-              tagline: event.tagline,
-              interested: event.population,
-              date: event.date,
-              sponsored: event.sponsored,
-              city: event.city,
-            }
-          })
-      });
-      await sleep(500);
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      // selectedIndex: 2,
+      loading: true,
+      refreshing: false,
+      events: [],
+      event: -1,
+      eventScale: new Animated.Value(1),
+      prepare: false,
+      open: false,
+      isAnimating: false,
+      dimensions: {},
+    };
+    // this.updateIndex = this.updateIndex.bind(this);
+    this._eventRefs = [];
+
+    this.refresh = this.refresh.bind(this);
+    this.fetchfeaturedStories = this.fetchfeaturedStories.bind(this);
+    this.onCardPressIn = this.onCardPressIn.bind(this);
+    this.onCardPressOut = this.onCardPressOut.bind(this);
+    this.onCardPress = this.onCardPress.bind(this);
+    this.closeCard = this.closeCard.bind(this);
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    let { location, locationLoaded } = nextProps.screenProps;
+
+    if (locationLoaded) {
+      await this.fetchfeaturedStories(location);
 
       this.setState(() => ({
-        refreshing: false,
-        events,
+        loading: false,
       }));
-      console.log(events);
-      this.setState(() => ({ data: events }))
+    }
+  }
+  refresh() {
+    let { location, locationLoaded } = this.props.screenProps;
 
+    if (locationLoaded) {
+      this.fetchfeaturedStories(location);
+    }
+  }
+
+  async fetchfeaturedStories(location = null) {
+    this.setState(() => ({
+      refreshing: true,
+    }));
+
+    let allCities = true;
+    let allowedCities = [];
+    let coords;
+
+    if (location) {
+      allCities = false;
+      coords = location.coords;
     }
 
+    if (!allCities) {
+      let citiesData = await firebase
+        .database()
+        .ref('Cities')
+        .once('value');
 
+      let cities = citiesData.val();
+      allowedCities = Object.keys(cities)
+        .map(id => {
+          let city = cities[id];
+          return {
+            id,
+            ...city,
+          };
+        })
+        .filter(c =>
+          geodist(
+            {
+              latitude: c.latitude,
+              longitude: c.longitude,
+            },
+            {
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            },
+            { exact: true, limit: 60 }
+          )
+        )
+        .map(c => c.name);
 
-    handleSnapToItem(index){
+      allCities = allCities || allowedCities.length === 0;
     }
-    _renderItem2 = ( {item,  index} ) => {
 
-      return (
+    firebase.firestore().collection('stories').get().then((snap) => {
+      itemsStory = snap.docs.reduce((resStory, itemStory) => ({ ...resStory,
+        [itemStory.id]: itemStory.data()
+      }), {});
+      this.setState({itemsStory})
+      console.log(itemsStory);
+      events = Object.keys(itemsStory || {})
+        .map(id => {
+          let event = itemsStory[id];
+          return {
+            ...event,
+            id,
+            name: event.name,
+            type: event.category,
+            image: event.imageURL && event.imageURL.length > 0 && {
+              uri: event.imageURL
+            },
+            interested: event.population,
+            tagline: event.startTime + ' | ' + event.endTime,
+            date: event.date,
+            sponsored: event.sponsored,
+            city: event.city,
+          }
+        })
+    });
 
-      <PoolCards
-      image={item.imageURL}
-      name={item.name}
-      tagline={item.tagline}
-      cardStyle={{ height: 425 }}
-      />
+    this.setState(() => ({
+      refreshing: false,
+      events,
+    }));
+  }
 
-      );
-    }
-    get pagination () {
-        const { topLevel, activeSlide = 0,} = this.state;
-        return (
-            <Pagination
-              dotsLength={topLevel.length}
-              activeDotIndex={activeSlide}
-              containerStyle={{ backgroundColor: 'white' }}
-              dotStyle={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  marginHorizontal: 8,
-                  backgroundColor: 'black'
-              }}
-              inactiveDotStyle={{
-                backgroundColor: 'black'
-              }}
-              inactiveDotOpacity={0.4}
-              inactiveDotScale={0.8}
-            />
+  onCardPressIn(id) {
+    let animation = Animated.spring(this.state.eventScale, {
+      toValue: 0.95,
+    });
+
+    this.setState(
+      () => ({
+        event: id,
+      }),
+      () => animation.start()
+    );
+  }
+
+  onCardPressOut(id) {
+    let animation = Animated.spring(this.state.eventScale, {
+      toValue: 1,
+    });
+
+    this.setState(
+      () => ({
+        event: id,
+      }),
+      () => {
+        animation.start();
+      }
+    );
+  }
+
+  onCardPress(id) {
+    this._eventRefs[id]
+      .getNode()
+      .measure((sX, sY, width, height, pageX, pageY) => {
+        this.setState(
+          () => ({
+            event: id,
+            prepare: true,
+            dimensions: {
+              pageX,
+              pageY,
+              width,
+              height,
+            },
+          }),
+          () => {
+            setTimeout(() => {
+              LayoutAnimation.configureNext(animConfig, () =>
+                this.setState(() => ({
+                  isAnimating: false,
+                }))
+              );
+              this.props.screenProps.setStatusBarVisibility(false);
+              this.props.screenProps.setTabsVisibility(false);
+
+              this.setState(() => ({
+                open: true,
+                isAnimating: true,
+              }));
+            }, 0);
+          }
         );
-    }
-    render = () => {
-      const { data } = this.state
+      });
+  }
 
-      if(!data){
-        console.log("no data")
+  closeCard() {
+    this._eventRefs[this.state.event]
+      .getNode()
+      .measure((x, y, width, height, pageX, pageY) => {
+        LayoutAnimation.configureNext(animConfig, () => {
+          this.setState(() => ({
+            event: -1,
+            prepare: false,
+            isAnimating: false,
+          }));
+        });
+        this.props.screenProps.setStatusBarVisibility(true);
+        this.props.screenProps.setTabsVisibility(true);
+
+        this.setState(() => ({
+          open: false,
+          isAnimating: true,
+          dimensions: {
+            pageX,
+            pageY,
+            width,
+            height,
+          },
+        }));
+      });
+
+  }
+
+  eventRef(i, ref) {
+    this._eventRefs[i] = ref;
+  }
+  render() {
+    let {
+      events,
+      event,
+      eventScale,
+      prepare,
+      open,
+      isAnimating,
+      dimensions,
+      refreshing,
+      loading,
+    } = this.state;
+
+
+    return (
+      <SafeAreaView style={styles.container} forceInset={{ top: 'always' }}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          pointerEvents={prepare || open ? 'none' : 'auto'}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={this.refresh} />
+          }
+        >
+          <ScreenHeader
+            title="Stories"
+            location={this.props.screenProps.location}
+          />
+
+          <View style={styles.cardList}>
+            {events.length > 0
+              ? events.map((e, i) => (
+                  <Animated.View
+                    key={e.id}
+                    ref={r => this.eventRef(i, r)}
+                    style={[
+                      styles.animatedCard,
+                      event == i && { transform: [{ scale: eventScale }] },
+                      event == i && prepare && { opacity: 0 },
+                    ]}
+                  >
+                    <StoryCard
+                    name={e.name}
+                    type={e.category}
+                    image={e.imageURL}
+                    interested={e.interested}
+                    cardStyle={{ height: 300 }}
+                    onPressIn={() => this.onCardPressIn(i)}
+                    onPressOut={() => this.onCardPressOut(i)}
+                    onPress={() => this.onCardPress(i)}
+                    shadow
+                    />
+                  </Animated.View>
+                ))
+              : !loading && (
+                  <StoryCard
+                    name="No Stories Here"
+                    type="Uh oh"
+                    tagline="Check back soon!"
+                    image={require('../assets/images/nothing-found.gif')}
+                    cardStyle={{ height: 350 }}
+                    shadow
+                  />
+                )}
+          </View>
+        </ScrollView>
+        {event >= 0 &&
+          prepare && (
+            <StoryDescription
+              event={events[event]}
+              open={open}
+              isAnimating={isAnimating}
+              dimensions={dimensions}
+              close={this.closeCard}
+            />
+          )}
+      </SafeAreaView>
+
+    );
+  }
 }
-      return (
-        <SafeAreaView style={styles.container} forceInset={{ top: 'always' }}>
-          <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <ScreenHeader title="Pool" location={this.props.screenProps.location}/>
 
-            <View style={styles.cardList}>
-
-              <Carousel
-                ref={ (c) => { this._carousel = c; } }
-                data={data}
-                renderItem={this._renderItem2.bind(this)}
-                onSnapToItem={this.handleSnapToItem.bind(this)}
-                sliderWidth={360}
-                itemWidth={300}
-                itemHeight={1000}
-
-                layout={'default'}
-                firstItem={0}
-                autoplay={true}
-                autoplayInterval={2000}
-              />
-
-
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-
-      );
-    }
-}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -174,10 +354,9 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   cardList: {
-    marginLeft: -20,
+    marginTop: 10,
   },
-  cardList2: {
-    paddingBottom: 20,
+  animatedCard: {
+    marginBottom: 35,
   },
-
 });

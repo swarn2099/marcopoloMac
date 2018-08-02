@@ -56,17 +56,16 @@ export default class Featured extends React.Component {
             title: "Stories",
             next: 'OrginalStory',
           }, {
-            tagline: "News and Tips from our Travelers",
+            tagline: "News and Tips from around campus",
             thumbnail: "https://media.giphy.com/media/d2Z3DHCDq68eUNHO/giphy.gif",
-            title: "News & Tips",
+            title: "Breaking News",
             next: 'OrginalStory',
 
           }, {
             tagline: "Choose the events you would like to go to",
-            thumbnail: "https://wallpaperstudio10.com/static/wpdb/wallpapers/3840x2160/166682.jpg",
+            thumbnail:' ../assets/images/icon.png',
             title: "Coming Up",
             next: 'OrginalStory',
-
           }
         ],
         bottomLevel: [
@@ -89,11 +88,9 @@ export default class Featured extends React.Component {
       };
     }
 
-    handleSnapToItem(index){
-    }
+    handleSnapToItem(index){}
 
     _renderItem = ( {item, index} ) => {
-      Haptic.impact(Haptic.ImpactStyles.Medium)
 
       return (
 
@@ -103,7 +100,6 @@ export default class Featured extends React.Component {
       tagline={item.tagline}
       cardStyle={{ height: 300 }}
       onPress={() => this.props.navigation.navigate(item.next)}
-
       />
 
       );

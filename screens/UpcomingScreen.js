@@ -256,7 +256,7 @@ this.state.index === 5;
                    },
                    interested: event.population,
 
-                   tagline: event.startTime + ' | ' + event.endTime,
+                   time: event.startTime + ' to ' + event.endTime,
                    date: event.date,
                    sponsored: event.sponsored,
                    city: event.city,
@@ -290,7 +290,7 @@ this.state.index === 5;
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -323,7 +323,7 @@ this.state.index === 5;
                },
                interested: event.population,
 
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -355,7 +355,7 @@ this.state.index === 5;
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -387,7 +387,7 @@ this.state.index === 5;
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -420,7 +420,7 @@ this.state.index === 5;
                image: event.imageURL && event.imageURL.length > 0 && {
                  uri: event.imageURL
                },
-               tagline: event.startTime + ' | ' + event.endTime,
+               time: event.startTime + ' to ' + event.endTime,
                date: event.date,
                sponsored: event.sponsored,
                city: event.city,
@@ -487,7 +487,7 @@ this.state.index === 5;
                     name={e.name}
                     type={e.category}
                     image={e.imageURL}
-                    tagline={e.startTime + ' | ' + e.endTime}
+                    time={e.startTime + ' to ' + e.endTime}
                     sponsored={e.sponsored}
                     interested={e.interested}
                     cardStyle={{ height: 300 }}
@@ -502,7 +502,7 @@ this.state.index === 5;
                   <FeaturedCard
                     name="No Featured Events"
                     type="Uh oh"
-                    tagline="Check back soon!"
+                    time="Check back soon!"
                     image={require('../assets/images/nothing-found.gif')}
                     cardStyle={{ height: 350 }}
                     shadow
